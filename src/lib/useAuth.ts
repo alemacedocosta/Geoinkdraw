@@ -50,7 +50,8 @@ export function useAuth() {
             alert("Sua conta foi bloqueada pelo administrador.");
           }
         } catch (error) {
-          handleFirestoreError(error, OperationType.GET, `users/${firebaseUser.uid}`);
+          console.error("Auth error:", error);
+          // Don't throw here to avoid blocking setLoading(false)
         }
       } else {
         setProfile(null);
