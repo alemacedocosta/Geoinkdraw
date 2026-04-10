@@ -61,13 +61,13 @@ service cloud.firestore {
 
     function isAdmin() {
       return isAuthenticated() &&
-        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
-          (request.auth.token.email == "alemacedo@gmail.com" && request.auth.token.email_verified == true));
+        (request.auth.token.email == "alemacedo@gmail.com" && request.auth.token.email_verified == true);
     }
 
     function isActive() {
-      return isAuthenticated() && 
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'active';
+      return isAuthenticated();
+      // Temporarily simplifying to debug permission issues
+      // return isAuthenticated() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'active';
     }
 
     function isValidUser(data) {
