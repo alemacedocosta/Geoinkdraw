@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { db, handleFirestoreError, OperationType } from '../lib/firebase';
+import { db, auth, handleFirestoreError, OperationType } from '../lib/firebase';
 import { collection, query, onSnapshot, doc, updateDoc, addDoc, serverTimestamp, deleteDoc } from 'firebase/firestore';
 import { UserProfile, Invitation } from '../types';
 import { Shield, UserX, UserCheck, Mail, Send, Trash2, Loader2 } from 'lucide-react';
@@ -36,28 +36,28 @@ export const AdminPanel: React.FC = () => {
     }
   };
 
-  const sendInvite = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inviteEmail) return;
-    try {
-      await addDoc(collection(db, 'invitations'), {
-        email: inviteEmail,
-        invitedBy: 'admin', // Simplified
-        createdAt: serverTimestamp(),
-        status: 'pending'
-      });
-      setInviteEmail('');
-      alert('Convite enviado (simulado)!');
-    } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, 'invitations');
-    }
+  const copyInviteLink = () => {
+    const appUrl = window.location.origin;
+    const message = `🎨 Olá! Venha desenhar caminhos comigo no Geoinkdraw! Transforme seus passos em arte digital.\n\nAcesse aqui: ${appUrl}`;
+    
+    navigator.clipboard.writeText(message).then(() => {
+      alert('Texto de convite copiado para a área de transferência! Agora é só colar no WhatsApp.');
+    }).catch(err => {
+      console.error('Erro ao copiar:', err);
+      alert('Não foi possível copiar automaticamente. O link é: ' + appUrl);
+    });
   };
 
-  const deleteInvite = async (id: string) => {
+  const deleteUser = async (user: UserProfile) => {
+    if (!window.confirm(`Tem certeza que deseja excluir permanentemente o usuário ${user.displayName}? Esta ação não pode ser desfeita.`)) {
+      return;
+    }
+
     try {
-      await deleteDoc(doc(db, 'invitations', id));
+      await deleteDoc(doc(db, 'users', user.uid));
+      alert('Usuário excluído com sucesso.');
     } catch (error) {
-      handleFirestoreError(error, OperationType.DELETE, `invitations/${id}`);
+      handleFirestoreError(error, OperationType.DELETE, `users/${user.uid}`);
     }
   };
 
@@ -71,66 +71,56 @@ export const AdminPanel: React.FC = () => {
           PAINEL DE CONTROLE
         </h2>
 
-        <div className="flex flex-col gap-4">
-          <section>
-            <h3 className="font-bold text-xs uppercase text-gray-500 mb-2">Enviar Convite</h3>
-            <form onSubmit={sendInvite} className="flex gap-2">
-              <input 
-                type="email" 
-                placeholder="email@exemplo.com" 
-                value={inviteEmail}
-                onChange={(e) => setInviteEmail(e.target.value)}
-                className="ink-border p-2 text-sm flex-1 focus:outline-none"
-              />
-              <button type="submit" className="ink-button bg-black text-white flex items-center gap-2">
-                <Send size={16} />
-                CONVIDAR
+        <div className="flex flex-col gap-6">
+          <section className="bg-gray-50 p-4 ink-border">
+            <h3 className="font-bold text-xs uppercase text-gray-500 mb-3">Convidar Novos Artistas</h3>
+            <div className="flex flex-col gap-3">
+              <p className="text-xs text-gray-600">Gere uma mensagem personalizada para enviar via WhatsApp ou redes sociais.</p>
+              <button 
+                onClick={copyInviteLink}
+                className="ink-button bg-black text-white flex items-center justify-center gap-2 py-3"
+              >
+                <Send size={18} />
+                COPIAR TEXTO DE CONVITE
               </button>
-            </form>
-          </section>
-
-          <section>
-            <h3 className="font-bold text-xs uppercase text-gray-500 mb-2">Usuários ({users.length})</h3>
-            <div className="flex flex-col gap-2">
-              {users.map(u => (
-                <div key={u.uid} className="flex items-center justify-between p-2 border-b border-gray-100 last:border-0">
-                  <div className="flex items-center gap-2">
-                    <img src={u.photoURL} alt="" className="w-8 h-8 rounded-full border border-black" referrerPolicy="no-referrer" />
-                    <div>
-                      <p className="text-xs font-bold">{u.displayName}</p>
-                      <p className="text-[10px] text-gray-500">{u.email}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`text-[8px] font-bold px-1 rounded border ${u.status === 'active' ? 'border-green-500 text-green-500' : 'border-red-500 text-red-500'}`}>
-                      {u.status.toUpperCase()}
-                    </span>
-                    {u.email !== 'alemacedo@gmail.com' && (
-                      <button 
-                        onClick={() => toggleUserStatus(u)}
-                        className={`p-1 ink-border ${u.status === 'active' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}`}
-                      >
-                        {u.status === 'active' ? <UserX size={14} /> : <UserCheck size={14} />}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
             </div>
           </section>
 
           <section>
-            <h3 className="font-bold text-xs uppercase text-gray-500 mb-2">Convites Pendentes</h3>
+            <h3 className="font-bold text-xs uppercase text-gray-500 mb-2">Usuários Cadastrados ({users.length})</h3>
             <div className="flex flex-col gap-2">
-              {invitations.map(i => (
-                <div key={i.id} className="flex items-center justify-between p-2 border-b border-gray-100 last:border-0">
-                  <div className="flex items-center gap-2">
-                    <Mail size={14} className="text-gray-400" />
-                    <p className="text-xs">{i.email}</p>
+              {users.map(u => (
+                <div key={u.uid} className="flex items-center justify-between p-3 bg-gray-50 ink-border">
+                  <div className="flex items-center gap-3">
+                    <img src={u.photoURL} alt="" className="w-10 h-10 rounded-full border-2 border-black" referrerPolicy="no-referrer" />
+                    <div>
+                      <p className="text-sm font-bold">{u.displayName}</p>
+                      <p className="text-[10px] text-gray-500 uppercase">{u.email}</p>
+                    </div>
                   </div>
-                  <button onClick={() => deleteInvite(i.id)} className="text-red-500 hover:bg-red-50 p-1">
-                    <Trash2 size={14} />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded border-2 ${u.status === 'active' ? 'border-green-500 text-green-500' : 'border-red-500 text-red-500'}`}>
+                      {u.status.toUpperCase()}
+                    </span>
+                    {u.email !== 'alemacedo@gmail.com' && (
+                      <div className="flex gap-1">
+                        <button 
+                          onClick={() => toggleUserStatus(u)}
+                          title={u.status === 'active' ? 'Bloquear' : 'Desbloquear'}
+                          className={`p-2 ink-border ${u.status === 'active' ? 'bg-orange-50 text-orange-600' : 'bg-green-50 text-green-600'}`}
+                        >
+                          {u.status === 'active' ? <UserX size={16} /> : <UserCheck size={16} />}
+                        </button>
+                        <button 
+                          onClick={() => deleteUser(u)}
+                          title="Excluir Usuário"
+                          className="p-2 ink-border bg-red-50 text-red-600"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

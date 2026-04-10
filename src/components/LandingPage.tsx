@@ -18,7 +18,7 @@ export const LandingPage: React.FC = () => {
           <div className="w-24 h-24 bg-black flex items-center justify-center ink-border rotate-3">
             <MapPin size={48} className="text-white" />
           </div>
-          <h1 className="font-pixel text-6xl mt-4">GeoInk</h1>
+          <h1 className="font-pixel text-6xl mt-4">Geoinkdraw</h1>
           <p className="text-sm font-bold tracking-widest uppercase opacity-60">O mundo é seu papel</p>
         </div>
 

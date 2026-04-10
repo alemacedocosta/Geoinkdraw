@@ -73,7 +73,7 @@ export default function App() {
             <div className="w-8 h-8 bg-black flex items-center justify-center ink-border">
               <Plus className="text-white" size={16} />
             </div>
-            <h1 className="font-pixel text-3xl">GeoInk</h1>
+            <h1 className="font-pixel text-3xl">Geoinkdraw</h1>
           </div>
           
           <div className="flex items-center gap-4">

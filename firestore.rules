@@ -113,6 +113,7 @@ service cloud.firestore {
       allow read: if true; // Allow public read to prevent auth loop
       allow create: if isAuthenticated() && isOwner(userId);
       allow update: if isOwner(userId) || isAdmin();
+      allow delete: if isAdmin();
     }
 
     match /drawings/{drawingId} {
