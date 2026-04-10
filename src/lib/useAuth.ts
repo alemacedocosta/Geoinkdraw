@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { auth, db, handleFirestoreError, OperationType } from './firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { UserProfile } from '../types';
 
 export function useAuth() {
@@ -16,11 +16,19 @@ export function useAuth() {
       if (firebaseUser) {
         try {
           const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+          let currentProfile: UserProfile | null = null;
+
           if (userDoc.exists()) {
-            setProfile(userDoc.data() as UserProfile);
+            currentProfile = userDoc.data() as UserProfile;
+            // Force admin role for the specific email if not already set
+            if (firebaseUser.email === 'alemacedo@gmail.com' && currentProfile.role !== 'admin') {
+              await updateDoc(doc(db, 'users', firebaseUser.uid), { role: 'admin' });
+              currentProfile.role = 'admin';
+            }
+            setProfile(currentProfile);
           } else {
             // Create profile
-            const newProfile: Partial<UserProfile> = {
+            const newProfile: UserProfile = {
               uid: firebaseUser.uid,
               displayName: firebaseUser.displayName || 'Anonymous',
               photoURL: firebaseUser.photoURL || '',
@@ -32,11 +40,11 @@ export function useAuth() {
               createdAt: serverTimestamp() as any
             };
             await setDoc(doc(db, 'users', firebaseUser.uid), newProfile);
-            setProfile(newProfile as UserProfile);
+            setProfile(newProfile);
+            currentProfile = newProfile;
           }
 
           // Check if blocked
-          const currentProfile = userDoc.exists() ? (userDoc.data() as UserProfile) : null;
           if (currentProfile?.status === 'blocked') {
             await auth.signOut();
             alert("Sua conta foi bloqueada pelo administrador.");

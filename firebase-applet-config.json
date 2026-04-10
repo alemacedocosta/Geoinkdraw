@@ -1,10 +1,10 @@
 {
-  "projectId": "gen-lang-client-0036259756",
-  "appId": "1:768187556086:web:893babb7cace28f40c8cd7",
-  "apiKey": "AIzaSyBTIZUukH5uZpyeBpoA9Ekl4MzywKX2h4A",
-  "authDomain": "gen-lang-client-0036259756.firebaseapp.com",
+  "projectId": "geoinkdraw",
+  "appId": "1:901662334274:web:fcbaa8e8d2c13c554c3cdb",
+  "apiKey": "AIzaSyBN_arOnyZA_wOQv10FRZ3gbQGMmjOChIU",
+  "authDomain": "geoinkdraw.firebaseapp.com",
   "firestoreDatabaseId": "ai-studio-59bf8826-8f60-44e7-b0d4-7589b99f2fc1",
-  "storageBucket": "gen-lang-client-0036259756.firebasestorage.app",
-  "messagingSenderId": "768187556086",
+  "storageBucket": "geoinkdraw.firebasestorage.app",
+  "messagingSenderId": "901662334274",
   "measurementId": ""
 }
