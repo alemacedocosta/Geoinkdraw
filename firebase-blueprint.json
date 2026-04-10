@@ -1,0 +1,89 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile and gamification stats",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "user"] },
+        "status": { "type": "string", "enum": ["active", "blocked", "pending"] },
+        "trophyLevel": { "type": "number", "description": "Level of the user trophy (0-5)" },
+        "totalDrawings": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "displayName", "email"]
+    },
+    "Drawing": {
+      "title": "Drawing",
+      "description": "A drawing created by moving through space",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "creatorUid": { "type": "string" },
+        "creatorName": { "type": "string" },
+        "creatorPhoto": { "type": "string" },
+        "title": { "type": "string" },
+        "path": { 
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "lat": { "type": "number" },
+              "lng": { "type": "number" },
+              "timestamp": { "type": "number" }
+            }
+          }
+        },
+        "likesCount": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "monthKey": { "type": "string", "description": "YYYY-MM for monthly ranking" }
+      },
+      "required": ["creatorUid", "path", "createdAt", "monthKey"]
+    },
+    "Like": {
+      "title": "Like",
+      "description": "A like on a drawing",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "drawingId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "drawingId"]
+    },
+    "Invitation": {
+      "title": "Invitation",
+      "description": "App invitation for new users",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "invitedBy": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["pending", "used"] }
+      },
+      "required": ["email", "invitedBy", "createdAt", "status"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/drawings/{drawingId}": {
+      "schema": "Drawing",
+      "description": "Public drawings"
+    },
+    "/likes/{likeId}": {
+      "schema": "Like",
+      "description": "Likes tracking (id is userId_drawingId)"
+    },
+    "/invitations/{invitationId}": {
+      "schema": "Invitation",
+      "description": "App invitations"
+    }
+  }
+}

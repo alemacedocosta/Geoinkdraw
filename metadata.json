@@ -1,0 +1,7 @@
+{
+  "name": "GeoInk",
+  "description": "App de desenho por deslocamento (geolocalização) com visual pixelizado e timeline social.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}

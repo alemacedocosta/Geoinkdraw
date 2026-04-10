@@ -1,0 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=VT323&family=JetBrains+Mono:wght@400;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-pixel: "VT323", monospace;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+@layer base {
+  body {
+    @apply bg-[#e0e0e0] text-[#1a1a1a] font-mono;
+    image-rendering: pixelated;
+  }
+}
+
+@utility ink-border {
+  @apply border-2 border-[#1a1a1a] shadow-[4px_4px_0px_0px_rgba(26,26,26,1)];
+}
+
+@utility ink-button {
+  @apply ink-border bg-white px-4 py-2 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all;
+}
+
+@utility pixel-text {
+  @apply font-pixel text-xl tracking-wider;
+}
